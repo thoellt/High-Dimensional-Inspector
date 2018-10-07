@@ -1,0 +1,20 @@
+dist: trusty
+sudo: required
+language:
+  - cpp
+compiler:
+  - gcc
+
+before_install:
+  - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
+  - sudo apt-get update -qq
+
+before_script:
+  - ./scripts/install-dependencies.sh
+  - mkdir build
+  - cd build
+  - cmake ..
+
+script:
+  - make -j 2
+  - ./applications/tdd/tdd
