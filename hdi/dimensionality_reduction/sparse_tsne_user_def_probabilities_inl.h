@@ -41,10 +41,8 @@
 #include "sptree.h"
 #include <random>
 
-#ifdef __APPLE__
+#ifdef __USE_GCD__
 #include <dispatch/dispatch.h>
-#else
-#define __block
 #endif
 
 #pragma warning( push )
@@ -286,13 +284,13 @@ namespace hdi{
     template <typename scalar, typename sparse_scalar_matrix>
     void SparseTSNEUserDefProbabilities<scalar, sparse_scalar_matrix>::computeLowDimensionalDistribution(){
       const int n = getNumberOfDataPoints();
-#ifdef __APPLE__
+#ifdef __USE_GCD__
       //std::cout << "GCD dispatch, sparse_tsne_user_def_probabilities 285.\n";
       dispatch_apply(n, dispatch_get_global_queue(0, 0), ^(size_t j) {
 #else
       #pragma omp parallel for
       for(int j = 0; j < n; ++j){
-#endif //__APPLE__
+#endif //__USE_GCD__
         _Q[j*n + j] = 0;
         for(int i = j+1; i < n; ++i){
           const double euclidean_dist_sq(
@@ -308,7 +306,7 @@ namespace hdi{
           _Q[i*n + j] = static_cast<scalar_type>(v);
         }
       }
-#ifdef __APPLE__
+#ifdef __USE_GCD__
       );
 #endif
       double sum_Q = 0;
@@ -365,16 +363,16 @@ namespace hdi{
       sptree.computeEdgeForces(_P, exaggeration, positive_forces.data());
 
       /*__block*/ std::vector<hp_scalar_type> sum_Q_subvalues(getNumberOfDataPoints(),0);
-//#ifdef __APPLE__
+//#ifdef __USE_GCD__
 //      std::cout << "GCD dispatch, sparse_tsne_user_def_probabilities 365.\n";
 //      dispatch_apply(getNumberOfDataPoints(), dispatch_get_global_queue(0, 0), ^(size_t n) {
 //#else
       #pragma omp parallel for
       for(int n = 0; n < getNumberOfDataPoints(); n++){
-//#endif //__APPLE__
+//#endif //__USE_GCD__
         sptree.computeNonEdgeForcesOMP(n, _theta, negative_forces.data() + n * _params._embedding_dimensionality, sum_Q_subvalues[n]);
       }
-//#ifdef __APPLE__
+//#ifdef __USE_GCD__
 //      );
 //#endif
 

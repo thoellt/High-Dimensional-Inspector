@@ -1,6 +1,14 @@
 cmake_minimum_required (VERSION 2.8.11)
 project (HighDimInspector)
 
+if(APPLE)
+    if(EXISTS "/usr/local/opt/llvm/lib/libiomp5.dylib")
+        set(CMAKE_XCODE_ATTRIBUTE_CC "/usr/local/opt/llvm/bin/clang")
+        set(CMAKE_XCODE_ATTRIBUTE_CXX "/usr/local/opt/llvm/bin/clang")
+        include_directories("/usr/local/opt/llvm/lib/clang/7.0.0/include")
+    endif()
+endif(APPLE)
+
 option(APP_TDD "Build TDD" ON)
 option(APP_COMMAND_LINE "Build command line tools" ON)
 option(APP_VISUAL_TESTS "Build visual tests" ON)
